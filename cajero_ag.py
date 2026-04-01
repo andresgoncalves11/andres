@@ -71,5 +71,5 @@ else:
             st.rerun()
 
     
- # Streamlit run cajero_ag.py   
+ # streamlit run cajero_ag.py   
  #a
