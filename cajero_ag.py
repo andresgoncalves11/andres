@@ -1,60 +1,75 @@
 import os
-os.system('clear')
-while True:
- print("Ingrese su número de cédula")
- cedula = str(input("Cédula: "))
- if cedula == "1234567890":
-    break
-    print("Cédula correcta")
- else:   print("Cédula incorrecta")
- continue
-os.system('clear')
-print("Bienvenido al cajero automático")
-print("ingrese su saldo")
-saldo = float(input("Saldo: "))
-print("Seleccione su moneda")
-print("1.USD")
-print("2.Bs")
-moneda = int(input("Moneda: "))
-if moneda == 1:
-    moneda = "USD"
-elif moneda == 2:
-      moneda = "Bs"
-else:   print("Moneda no válida")
-while True:
-    print("--------------------------------------------------------------------")
-    print("Selecciona una opción")
-    print("1.Revisa tu saldo")
-    print("2.Retirar dinero")
-    print("3.Depositar")
-    print("4.Salir")
-    respuesta = int(input("Escoge una opción: "))
-    if respuesta == 1:
-     os.system('clear')
-     print(f"este es tu saldo {saldo} {moneda}")
-     continue
-    elif respuesta == 2:
-     print("Escoja cuánto dinero desea retirar")
-     dinero = float(input("Monto: "))
-     os.system('clear')
-     print(f"Se ha retirado {dinero} {moneda}")
-     saldo = saldo - dinero
-     print(f"Su saldo es de {saldo} {moneda}")
-     continue
-    elif respuesta == 3:
-     print("Escoja su destinatario")
-     destinatario = str(input("Destinatario: "))
-     print("Escoja el Monto")
-     Monto_2 = float(input("Monto: "))
-     os.system('clear')
-     print(f"Se ha transferido {Monto_2} {moneda} a {destinatario}")
-     saldo = saldo - Monto_2
-     print(f"Su saldo es de {saldo} {moneda}")
-     continue
-    elif respuesta == 4:
-     print("Hasta luego")
-     break    
+import streamlit as st 
+
+# Configuración inicial de la página
+st.title("🏦 Cajero Automático")
+
+# Usamos 'session_state' para que el saldo y la moneda no se borren 
+# cada vez que la página se actualice al presionar un botón.
+if 'saldo' not in st.session_state:
+    st.session_state.saldo = 0.0
+if 'moneda' not in st.session_state:
+    st.session_state.moneda = "USD"
+if 'autenticado' not in st.session_state:
+    st.session_state.autenticado = False
+
+# --- SECCIÓN 1: LOGIN (Tu primer bucle while/break) ---
+if not st.session_state.autenticado:
+    cedula = st.text_input("Ingrese su número de cédula", type="password")
+    if st.button("Ingresar"):
+        if cedula == "1234567890":
+            st.session_state.autenticado = True
+            st.rerun() # Esto recarga la página ya autenticado
+        else:
+            st.error("Cédula incorrecta")
+else:
+    # --- SECCIÓN 2: CONFIGURACIÓN INICIAL ---
+    st.sidebar.header("Configuración de cuenta")
+    nuevo_saldo = st.sidebar.number_input("Configura tu saldo inicial:", value=st.session_state.saldo)
+    opcion_moneda = st.sidebar.selectbox("Seleccione su moneda", ["1. USD", "2. Bs"])
+    
+    if st.sidebar.button("Actualizar Datos"):
+        st.session_state.saldo = nuevo_saldo
+        st.session_state.moneda = "USD" if "1" in opcion_moneda else "Bs"
+        st.success("Datos actualizados")
+
+    # --- SECCIÓN 3: MENÚ DE OPERACIONES (Tu segundo bucle while) ---
+    st.subheader(f"Bienvenido. Saldo disponible: {st.session_state.saldo} {st.session_state.moneda}")
+    
+    opcion = st.radio(
+        "Selecciona una opción:",
+        ["Revisa tu saldo", "Retirar dinero", "Depositar (Transferir)", "Salir"]
+    )
+
+    if opcion == "Revisa tu saldo":
+        st.info(f"Tu saldo actual es de: {st.session_state.saldo} {st.session_state.moneda}")
+
+    elif opcion == "Retirar dinero":
+        monto_retiro = st.number_input("Monto a retirar:", min_value=0.0)
+        if st.button("Confirmar Retiro"):
+            if monto_retiro <= st.session_state.saldo:
+                st.session_state.saldo -= monto_retiro
+                st.success(f"Se ha retirado {monto_retiro} {st.session_state.moneda}")
+                st.write(f"Nuevo saldo: {st.session_state.saldo}")
+            else:
+                st.error("Saldo insuficiente")
+
+    elif opcion == "Depositar (Transferir)":
+        destinatario = st.text_input("Destinatario:")
+        monto_transf = st.number_input("Monto a transferir:", min_value=0.0)
+        if st.button("Confirmar Transferencia"):
+            if monto_transf <= st.session_state.saldo:
+                st.session_state.saldo -= monto_transf
+                st.success(f"Se ha transferido {monto_transf} {st.session_state.moneda} a {destinatario}")
+                st.write(f"Nuevo saldo: {st.session_state.saldo}")
+            else:
+                st.error("Saldo insuficiente")
+
+    elif opcion == "Salir":
+        if st.button("Cerrar Sesión"):
+            st.session_state.autenticado = False
+            st.rerun()
 
     
-    
-
+ # Streamlit run cajero_ag.py   
+ #a
