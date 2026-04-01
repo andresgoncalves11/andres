@@ -2,7 +2,7 @@ import os
 import streamlit as st 
 
 # Configuración inicial de la página
-st.title("🏦 Usa esto mamaguevo")
+st.title("🏦 Cajero")
 
 # Usamos 'session_state' para que el saldo y la moneda no se borren 
 # cada vez que la página se actualice al presionar un botón.
